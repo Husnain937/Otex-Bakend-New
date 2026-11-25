@@ -22,6 +22,7 @@ export const getStockMaster = async (req, res) => {
           { "item.name": { $regex: search, $options: "i" } },
           { "item.sku": { $regex: search, $options: "i" } },
           { "item.uom": { $regex: search, $options: "i" } },
+          { "item.note": { $regex: search, $options: "i" } },
         ],
       });
     }
@@ -149,7 +150,8 @@ export const getStockLedger = async (req, res) => {
         { source: { $regex: search, $options: "i" } },
         { billNO: { $regex: search, $options: "i" } },
         { "itemSnapshot.name": { $regex: search, $options: "i" } },
-        { "itemSnapshot.sku": { $regex: search, $options: "i" } }
+        { "itemSnapshot.sku": { $regex: search, $options: "i" } },
+         { "itemSnapshot.note": { $regex: search, $options: "i" } }
       ];
     }
 
@@ -182,7 +184,7 @@ export const getStockLedger = async (req, res) => {
           reference: 1,
           createdAt: 1,
           itemId: 1,
-          itemSnapshot: 1
+          itemSnapshot: 1,
         }),
 
       StockLedger.countDocuments(match)
