@@ -72,7 +72,7 @@ export const getStockMaster = async (req, res) => {
     const countPipeline = [
       {
         $lookup: {
-          from: "items",
+          from: "gooditems",
           localField: "item",
           foreignField: "_id",
           as: "item",
@@ -89,7 +89,6 @@ export const getStockMaster = async (req, res) => {
 
     const countResult = await Stock.aggregate(countPipeline);
     const total = countResult[0]?.total || 0;
-
     /* =============================
        RESPONSE
     ============================= */
