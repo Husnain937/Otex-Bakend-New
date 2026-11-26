@@ -6,6 +6,7 @@ import mongoose from "mongoose";
 
 export const getStockMaster = async (req, res) => {
   try {
+
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 10, 100);
     const skip = (page - 1) * limit;
@@ -16,17 +17,34 @@ export const getStockMaster = async (req, res) => {
     ============================= */
     const matchConditions = [];
 
-    if (search) {
-      matchConditions.push({
-        $or: [
-          { "item.name": { $regex: search, $options: "i" } },
-          { "item.sku": { $regex: search, $options: "i" } },
-          { "item.uom": { $regex: search, $options: "i" } },
-          { "item.note": { $regex: search, $options: "i" } },
-        ],
-      });
-    }
+    // if (search) {
+    //   matchConditions.push({
+    //     $or: [
+    //       { "item.name": { $regex: search, $options: "i" } },
+    //       { "item.sku": { $regex: search, $options: "i" } },
+    //       { "item.uom": { $regex: search, $options: "i" } },
+    //       { "item.note": { $regex: search, $options: "i" } },
+    //     ],
+    //   });
+    // }
+if (search) {
+  const searchWords = search
+    .toLowerCase()
+    .replace(/[^\p{L}\p{N}\s]/gu, " ")
+    .split(/\s+/)
+    .filter(Boolean);
 
+  searchWords.forEach((word) => {
+    matchConditions.push({
+      $or: [
+        { "item.name": { $regex: word, $options: "i" } },
+        { "item.sku": { $regex: word, $options: "i" } },
+        { "item.uom": { $regex: word, $options: "i" } },
+        { "item.note": { $regex: word, $options: "i" } },
+      ],
+    });
+  });
+}
     /* =============================
        DATA PIPELINE
     ============================= */
@@ -44,8 +62,13 @@ export const getStockMaster = async (req, res) => {
       ...(matchConditions.length
         ? [{ $match: { $and: matchConditions } }]
         : []),
-
-      { $sort: { updatedAt: -1 } },
+{
+  $addFields: {
+    sortName: { $toInt: "$item.name" }
+  }
+},
+{ $sort: { sortName: 1 } },
+      // { $sort: { updatedAt: -1 } },
       { $skip: skip },
       { $limit: limit },
 
@@ -120,7 +143,6 @@ export const getStockLedger = async (req, res) => {
     const page = Math.max(parseInt(req.query.page) || 1, 1);
     const limit = Math.min(parseInt(req.query.limit) || 10, 100);
     const skip = (page - 1) * limit;
-
     /* =============================
        QUERY PARAMS
     ============================= */
